@@ -34,16 +34,36 @@ function td(i){return i===2||i===4}function gd(){return new Date().getDay()}
 function gs(){const h=(new Date().getUTCHours()-5+24)%24;if(h<7)return 1;if(h<7.5)return 2;if(h<12)return 4;if(h<12.5)return 5;if(h<17)return 6;if(h<17.5)return 7;if(h<21)return 9;return 0}
 function gn(){const h=(new Date().getUTCHours()-5+24)%24;if(h<7.5)return'7:30a';if(h<12.5)return'12:30p';if(h<17.5)return'5:30p';return'7:30a'}
 function gt(f){if(f<1e3)return 1;if(f<5e3)return 2;if(f<2e4)return 3;if(f<5e4)return 4;if(f<1e5)return 5;return 6}
-function gc(){let s='',c=document.getElementById('cal'),tg=document.getElementById('tier');const st=new Date(),cd=gd(),ws=new Date(st);ws.setDate(st.getDate()-cd);
-for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);const th=td(i),pt=i<cd;s+=`<div class="day ${th?'thread':''} ${pt?'past':''}"><div class="day-name">${dn[i]}</div><div class="day-date">${d.getDate()}</div>${th?'<span style="background:#a371f7;color:#fff;font-size:8px;padding:2px 4px;border-radius:4px">THREAD</span>':''}</div>`}
-let ts='<div class="sched-item completed"><div class="sched-time">6a</div><div class="sched-task">Research</div></div><div class="sched-item" id="s2"><div class="sched-time">7a</div><div class="sched-task">Draft</div></div><div class="sched-item" id="s3"><div class="sched-time">7a</div><div class="sched-task">Engage</div></div><div class="sched-item" id="s4"><div class="sched-time">7:30a</div><div class="sched-task">POST</div></div><div class="sched-item" id="s5"><div class="sched-time">12p</div><div class="sched-task">Engage</div></div><div class="sched-item" id="s6"><div class="sched-time">12:30p</div><div class="sched-task">POST</div></div><div class="sched-item" id="s7"><div class="sched-time">5p</div><div class="sched-task">Engage</div></div><div class="sched-item" id="s8"><div class="sched-time">5:30p</div><div class="sched-task">POST</div></div><div class="sched-item" id="s9"><div class="sched-time">9p</div><div class="sched-task">Report</div></div>';
-document.getElementById('cal').innerHTML=s;document.getElementById('sched').innerHTML=ts;let ts2='';for(let i=1;i<=6;i++)ts2+=`<div class="tier-item" id="t${i}"><div class="tier-num">${i}</div><div class="tier-fol">${i===1?'0-1K':i===2?'1K-5K':i===3?'5K-20K':i===4?'20K-50K':i===5?'50K-100K':'100K+'}</div><div class="tier-rev">${i===1?'$0':i===2?'$500':i===3?'$3K':i===4?'$10K':i===5?'$30K':'$50K'}</div></div>`;tg.innerHTML=ts2}
+function gc(){
+  let s='',c=document.getElementById('cal'),tg=document.getElementById('tier');
+  const st=new Date(),cd=gd(),ws=new Date(st);
+  ws.setDate(st.getDate()-cd);
+  for(let i=0;i<7;i++){
+    const d=new Date(ws);
+    d.setDate(ws.getDate()+i);
+    const th=td(i),pt=i<cd;
+    s+=`<div class="day ${th?'thread':''} ${pt?'past':''}"><div class="day-name">${dn[i]}</div><div class="day-date">${d.getDate()}</div>${th?'<span style="background:#a371f7;color:#fff;font-size:8px;padding:2px 4px;border-radius:4px">THREAD</span>':''}</div>`
+  }
+  let ts='<div class="sched-item completed" id="s1"><div class="sched-time">6a</div><div class="sched-task">Research</div></div>'+
+        '<div class="sched-item" id="s2"><div class="sched-time">7a</div><div class="sched-task">Draft</div></div>'+
+        '<div class="sched-item" id="s3"><div class="sched-time">7a</div><div class="sched-task">Engage</div></div>'+
+        '<div class="sched-item" id="s4"><div class="sched-time">7:30a</div><div class="sched-task">POST</div></div>'+
+        '<div class="sched-item" id="s5"><div class="sched-time">12p</div><div class="sched-task">Engage</div></div>'+
+        '<div class="sched-item" id="s6"><div class="sched-time">12:30p</div><div class="sched-task">POST</div></div>'+
+        '<div class="sched-item" id="s7"><div class="sched-time">5p</div><div class="sched-task">Engage</div></div>'+
+        '<div class="sched-item" id="s8"><div class="sched-time">5:30p</div><div class="sched-task">POST</div></div>'+
+        '<div class="sched-item" id="s9"><div class="sched-time">9p</div><div class="sched-task">Report</div></div>';
+  document.getElementById('cal').innerHTML=s;
+  document.getElementById('sched').innerHTML=ts;
+  let ts2='';
+  for(let i=1;i<=6;i++)ts2+=`<div class="tier-item" id="t${i}"><div class="tier-num">${i}</div><div class="tier-fol">${i===1?'0-1K':i===2?'1K-5K':i===3?'5K-20K':i===4?'20K-50K':i===5?'50K-100K':'100K+'}</div><div class="tier-rev">${i===1?'$0':i===2?'$500':i===3?'$3K':i===4?'$10K':i===5?'$30K':'$50K'}</div></div>`;
+  document.getElementById('tier').innerHTML=ts2
+}
 async function ld(){
   gc();
   const se=document.getElementById('status');
   const err=document.getElementById('err');
-  se.textContent='...';
-  err.style.display='none';
+  se.textContent='...';err.style.display='none';
   try{
     const r=await fetch('twitter-stats.php');
     if(!r.ok)throw Error('HTTP '+r.status);
@@ -60,8 +80,18 @@ async function ld(){
     document.getElementById('d').textContent=3-pd;
     document.getElementById('n').textContent=gn();
     document.getElementById('e').textContent=(s===3||s===5||s===7)?'ACTIVE':'Pending';
-    for(let i=1;i<=9;i++){const e=document.getElementById('s'+i);if(i<s)e.className='sched-item completed';else if(i===s)e.className='sched-item active';else e.className='sched-item'}
-    const tr=gt(f);for(let i=1;i<=6;i++)document.getElementById('t'+i).className='tier-item'+(i===tr?' current':'');
+    for(let i=1;i<=9;i++){
+      const e=document.getElementById('s'+i);
+      if(!e)continue;
+      if(i<s)e.className='sched-item completed';
+      else if(i===s)e.className='sched-item active';
+      else e.className='sched-item'
+    }
+    const tr=gt(f);
+    for(let i=1;i<=6;i++){
+      const e=document.getElementById('t'+i);
+      if(e)e.className='tier-item'+(i===tr?' current':'')
+    }
     se.textContent='Running';se.className='badge';lf=f
   }catch(e){
     se.textContent='Error';se.className='badge error';
