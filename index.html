@@ -2,7 +2,7 @@
 <html><head><meta charset="UTF-8"><title>@XAIGrowthLab</title><style>
 *{margin:0;padding:0;box-sizing:border-box}body{background:#0d1117;color:#e6edf3;padding:20px;font-family:-apple-system,sans-serif}
 .container{max-width:1200px;margin:0 auto}.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-.logo{font-size:24px;font-weight:700}.logo span{color:#58a6ff}.badge{background:#238636;color:#fff;padding:6px 12px;border-radius:16px;font-size:12px}
+.logo{font-size:24px;font-weight:700}.logo span{color:#58a6ff}.badge{background:#238636;color:#fff;padding:6px 12px;border-radius:16px;font-size:12px}.badge.error{background:#da3633}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}.card{background:#161b22;border:1px solid #21262d;border-radius:8px;padding:16px}
 .card-label{font-size:10px;color:#8b949e;text-transform:uppercase}.card-value{font-size:28px;font-weight:700}
 .blue{color:#58a6ff}.green{color:#3fb950}.orange{color:#d29922}.purple{color:#a371f7}.red{color:#f85149}
@@ -16,7 +16,9 @@
 .sched{display:grid;grid-template-columns:repeat(9,1fr);gap:6px}.sched-item{background:#161b22;border:1px solid #21262d;border-radius:6px;padding:8px;text-align:center}
 .sched-item.active{border-color:#238636}.sched-item.completed{border-color:#3fb950}
 .sched-time{font-size:11px;color:#58a6ff;font-weight:600}.sched-task{font-size:9px;color:#8b949e}
+#err{background:#da3633;color:#fff;padding:10px;border-radius:8px;margin-bottom:10px;display:none}
 </style></head><body><div class="container"><div class="header"><div class="logo">@<span>XAIGrowthLab</span></div><span class="badge" id="status">Loading...</span></div>
+<div id="err"></div>
 <div class="grid"><div class="card"><div class="card-label">Followers</div><div class="card-value purple" id="f">--</div><div class="card-label" id="fd">+0</div></div>
 <div class="card"><div class="card-label">Tweets</div><div class="card-value blue" id="t">--</div></div><div class="card"><div class="card-label">Following</div><div class="card-value green" id="fi">--</div></div>
 <div class="card"><div class="card-label">Likes</div><div class="card-value orange" id="l">--</div></div></div>
@@ -36,5 +38,35 @@ function gc(){let s='',c=document.getElementById('cal'),tg=document.getElementBy
 for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);const th=td(i),pt=i<cd;s+=`<div class="day ${th?'thread':''} ${pt?'past':''}"><div class="day-name">${dn[i]}</div><div class="day-date">${d.getDate()}</div>${th?'<span style="background:#a371f7;color:#fff;font-size:8px;padding:2px 4px;border-radius:4px">THREAD</span>':''}</div>`}
 let ts='<div class="sched-item completed"><div class="sched-time">6a</div><div class="sched-task">Research</div></div><div class="sched-item" id="s2"><div class="sched-time">7a</div><div class="sched-task">Draft</div></div><div class="sched-item" id="s3"><div class="sched-time">7a</div><div class="sched-task">Engage</div></div><div class="sched-item" id="s4"><div class="sched-time">7:30a</div><div class="sched-task">POST</div></div><div class="sched-item" id="s5"><div class="sched-time">12p</div><div class="sched-task">Engage</div></div><div class="sched-item" id="s6"><div class="sched-time">12:30p</div><div class="sched-task">POST</div></div><div class="sched-item" id="s7"><div class="sched-time">5p</div><div class="sched-task">Engage</div></div><div class="sched-item" id="s8"><div class="sched-time">5:30p</div><div class="sched-task">POST</div></div><div class="sched-item" id="s9"><div class="sched-time">9p</div><div class="sched-task">Report</div></div>';
 document.getElementById('cal').innerHTML=s;document.getElementById('sched').innerHTML=ts;let ts2='';for(let i=1;i<=6;i++)ts2+=`<div class="tier-item" id="t${i}"><div class="tier-num">${i}</div><div class="tier-fol">${i===1?'0-1K':i===2?'1K-5K':i===3?'5K-20K':i===4?'20K-50K':i===5?'50K-100K':'100K+'}</div><div class="tier-rev">${i===1?'$0':i===2?'$500':i===3?'$3K':i===4?'$10K':i===5?'$30K':'$50K'}</div></div>`;tg.innerHTML=ts2}
-async function ld(){gc();const se=document.getElementById('status');se.textContent='...';try{const r=await fetch('twitter-stats.php'),d=await r.json();if(d.error)throw Error(d.error);const m=d.account,f=m.followers||0;document.getElementById('f').textContent=f;document.getElementById('fd').textContent='+'+(f-lf)+' today';document.getElementById('t').textContent=m.tweets;document.getElementById('fi').textContent=m.following;document.getElementById('l').textContent=m.likes;const s=gs(),pd=s>=4?(s>=6?3:2):(s>2?1:0);document.getElementById('p').textContent=pd;document.getElementById('d').textContent=3-pd;document.getElementById('n').textContent=gn();document.getElementById('e').textContent=(s===3||s===5||s===7)?'ACTIVE':'Pending';for(let i=1;i<=9;i++){const e=document.getElementById('s'+i);if(i<s)e.className='sched-item completed';else if(i===s)e.className='sched-item active';else e.className='sched-item'}const tr=gt(f);for(let i=1;i<=6;i++)document.getElementById('t'+i).className='tier-item'+(i===tr?' current':'');se.textContent='Running';se.className='badge';lf=f}catch(e){se.textContent='Error';se.className='badge';se.style.background='#da3633'}}ld();setInterval(ld,3e4);
+async function ld(){
+  gc();
+  const se=document.getElementById('status');
+  const err=document.getElementById('err');
+  se.textContent='...';
+  err.style.display='none';
+  try{
+    const r=await fetch('twitter-stats.php');
+    if(!r.ok)throw Error('HTTP '+r.status);
+    const d=await r.json();
+    if(d.error)throw Error(d.error);
+    const m=d.account,f=m.followers||0;
+    document.getElementById('f').textContent=f;
+    document.getElementById('fd').textContent='+'+(f-lf)+' today';
+    document.getElementById('t').textContent=m.tweets;
+    document.getElementById('fi').textContent=m.following;
+    document.getElementById('l').textContent=m.likes;
+    const s=gs(),pd=s>=4?(s>=6?3:2):(s>2?1:0);
+    document.getElementById('p').textContent=pd;
+    document.getElementById('d').textContent=3-pd;
+    document.getElementById('n').textContent=gn();
+    document.getElementById('e').textContent=(s===3||s===5||s===7)?'ACTIVE':'Pending';
+    for(let i=1;i<=9;i++){const e=document.getElementById('s'+i);if(i<s)e.className='sched-item completed';else if(i===s)e.className='sched-item active';else e.className='sched-item'}
+    const tr=gt(f);for(let i=1;i<=6;i++)document.getElementById('t'+i).className='tier-item'+(i===tr?' current':'');
+    se.textContent='Running';se.className='badge';lf=f
+  }catch(e){
+    se.textContent='Error';se.className='badge error';
+    err.textContent='Error: '+e.message;err.style.display='block'
+  }
+}
+ld();setInterval(ld,3e4);
 </script></body></html>
