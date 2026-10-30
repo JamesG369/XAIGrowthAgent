@@ -15,6 +15,9 @@ TRADES_CSV = os.path.join(LOG, "paper_trades.csv")
 CSV_COLS = ["rule","cluster","keyword","mint","symbol","name","story","entry_ts","entry_iso","coin_age_at_entry_s",
             "entry_mcap_sol","exit_ts","exit_iso","exit_mcap_sol","hold_s","reason","gross_ret","net_ret","pnl_sol","marks","excluded","void_reason"]
 SOL_QUOTES = {"11111111111111111111111111111111", "So11111111111111111111111111111111111111112"}
+V2 = CFG.get("v2", {}) if CFG.get("v2", {}).get("enabled") else {}
+V2_RULES = ("FIRST2", "MOMO") if V2 else ()
+RULES = ("FIRST", "LEADER") + V2_RULES
 class BadPrice(ValueError): pass
 _solpx = {"t": 0, "v": None}
 def sol_usd():
@@ -144,7 +147,8 @@ class Bot:
         self.clusters = s.get("clusters", {})     # kw -> {first_match_ts, coins:{mint:{...}}, first_done, leader_done}
         self.positions = s.get("positions", [])   # open paper positions
         self.coin_seen = s.get("coin_seen", {})   # mint -> {created, name, symbol, creator}
-        self.traded = s.get("traded", {"FIRST": [], "LEADER": []})
+        self.traded = s.get("traded", {})
+        for r in RULES: self.traded.setdefault(r, [])
         self.last_news = 0; self.source_ok = {}; self.cycle = s.get("cycle", 0)
         self.last_cycle_end = s.get("last_cycle_end")
         self.pool = ThreadPoolExecutor(max_workers=12)
@@ -291,7 +295,7 @@ class Bot:
         t = now()
         base = {"ts": t, "iso": iso(t), "rule": rule, "kw": kw, "mint": mint, "symbol": coin.get("symbol"), "ctx": reason_ctx}
         if mint in self.traded[rule]: jl("events.jsonl", {**base, "event": "skip", "why": "already_traded"}); return False
-        if self.open_count(rule) >= CFG["max_concurrent_per_rule"]:
+        if self.open_count(rule) >= (V2["max_concurrent_per_rule"] if rule in V2_RULES else CFG["max_concurrent_per_rule"]):
             jl("events.jsonl", {**base, "event": "skip", "why": "max_concurrent"}); return False
         try: info = self.fresh(mint)
         except BadPrice as e:
@@ -307,6 +311,7 @@ class Bot:
         p = {"rule": rule, "cluster": kw, "keyword": kw, "mint": mint, "symbol": coin.get("symbol"), "name": coin.get("name"),
              "story": self.clusters[kw]["story"], "entry_ts": t2, "coin_age_at_entry_s": round(t2 - coin["created"]),
              "entry_mcap_sol": info["mcap_sol"], "marks": 0, "last_mcap": info["mcap_sol"], "rugcheck": info.get("rugcheck")}
+        if rule in V2_RULES: p["peak_mcap"] = info["mcap_sol"]
         self.positions.append(p); self.traded[rule].append(mint)
         jl("events.jsonl", {**base, "event": "OPEN", "entry_mcap_sol": info["mcap_sol"], "usd_mcap": info["usd_mcap"], "info": info})
         status(f"PAPER OPEN {rule} {coin.get('symbol')} kw={kw} mcap={info['mcap_sol']:.1f} SOL (${(info['usd_mcap'] or 0):,.0f}) age={p['coin_age_at_entry_s']}s")
@@ -345,8 +350,56 @@ class Bot:
                 if a < CFG["leader_min_mcap_sol"]:
                     jl("events.jsonl", {"ts": t, "iso": iso(t), "rule": "LEADER", "kw": kw, "mint": m, "event": "skip", "why": f"no_traction_{a:.1f}sol"}); continue
                 self.try_enter("LEADER", kw, m, coins[m], f"leader_of_{len(coins)}")
+        if V2: self.handle_v2_entries(t)
         # drop old clusters
         self.clusters = {k: v for k, v in self.clusters.items() if t - v["first_match_ts"] < 3 * 3600}
+
+    # ---------- v2 rules (separate test version; FIRST/LEADER above are unchanged) ----------
+    def handle_v2_entries(self, t):
+        # FIRST2: like FIRST, but if the earliest coin is filtered out, try the next-earliest fresh coin in the cluster.
+        for kw, cl in self.clusters.items():
+            if cl.get("first2_done"): continue
+            tried = cl.setdefault("first2_tried", [])
+            for m, c in sorted(cl["coins"].items(), key=lambda x: x[1]["created"]):
+                if m in tried: continue
+                if t - c["created"] > V2["first2_max_coin_age_sec"]: continue
+                tried.append(m)
+                if self.try_enter("FIRST2", kw, m, c, f"first2_attempt_{len(tried)}"): cl["first2_done"] = True
+                elif len(tried) >= V2["first2_max_attempts"]: cl["first2_done"] = True
+                break  # at most one attempt per cluster per cycle
+        # MOMO: re-price cluster coins every cycle during the watch window; enter the first coin that is above the
+        # mcap floor AND still rising (last N marks up). LEADER makes one decision at 150 s; this keeps watching.
+        cands = []
+        for kw, cl in self.clusters.items():
+            if cl.get("momo_done"): continue
+            for m, c in cl["coins"].items():
+                since = t - c["detected"]
+                if V2["momo_min_watch_sec"] <= since <= V2["momo_watch_sec"] and t - c["created"] <= CFG["coin_max_age_min"] * 60:
+                    cands.append((c.get("momo_checked", 0), kw, m))
+        cands.sort()  # least recently checked first, so a busy cycle round-robins instead of starving coins
+        cands = cands[: V2["momo_max_checks_per_cycle"]]
+        if not cands: return
+        futs = {(kw, m): self.pool.submit(self.fresh, m) for _, kw, m in cands}
+        wait(list(futs.values()), timeout=CFG["http_timeout_sec"] + 2)
+        n = V2["momo_rising_marks"]
+        for (kw, m), f in futs.items():
+            cl = self.clusters[kw]; c = cl["coins"][m]; c["momo_checked"] = t
+            if cl.get("momo_done") or not f.done() or f.exception(): continue
+            i = f.result()
+            if i.get("banned") or not i.get("sol_quoted", True): continue
+            hist = c.setdefault("momo_marks", []); hist.append(round(i["mcap_sol"], 3)); del hist[:-(n + 1)]
+            rising = len(hist) == n + 1 and all(b > a for a, b in zip(hist, hist[1:]))
+            if i["mcap_sol"] >= V2["momo_min_mcap_sol"] and rising:
+                if self.try_enter("MOMO", kw, m, c, f"momo_{i['mcap_sol']:.1f}sol_rising{n}"): cl["momo_done"] = True
+
+    def v2_exit(self, p, mc, g, held):
+        p["peak_mcap"] = max(p.get("peak_mcap") or mc, mc)
+        peak_g = p["peak_mcap"] / p["entry_mcap_sol"] - 1
+        if g <= V2["exit_sl_gross"]: return "sl"
+        if g >= V2["exit_tp_cap_gross"]: return "tp"
+        if peak_g >= V2["exit_trail_arm_gross"] and mc <= p["peak_mcap"] * (1 - V2["exit_trail_drop"]): return "trail"
+        if held >= V2["exit_time_sec"]: return "time"
+        return None
 
     def manage_positions(self):
         if not self.positions: return
@@ -373,7 +426,8 @@ class Bot:
             p["marks"] += 1; p["last_mcap"] = mc
             g = mc / p["entry_mcap_sol"] - 1
             reason = None
-            if g >= CFG["tp_gross"]: reason = "tp"
+            if p["rule"] in V2_RULES: reason = self.v2_exit(p, mc, g, held)
+            elif g >= CFG["tp_gross"]: reason = "tp"
             elif g <= CFG["sl_gross"]: reason = "sl"
             elif held >= CFG["time_exit_sec"]: reason = "time"
             if reason: self.close(p, mc, reason)
@@ -391,6 +445,7 @@ class Bot:
     # ---------- loop ----------
     def run(self):
         status(f"START pid={os.getpid()} PAPER_ONLY cfg tp={CFG['tp_gross']} sl={CFG['sl_gross']} time={CFG['time_exit_sec']}s cost={CFG['rt_cost']}")
+        if V2: status(f"TEST v2 rules {','.join(V2_RULES)} running alongside v1 FIRST/LEADER (v1 unchanged); v2 params={json.dumps({k: v for k, v in V2.items() if k != 'note'})}")
         if self.last_cycle_end and now() - self.last_cycle_end > 120:
             status(f"GAP detected: {round(now()-self.last_cycle_end)}s since last cycle (box sleep/stop)")
         while True:

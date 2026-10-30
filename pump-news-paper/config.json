@@ -44,5 +44,22 @@
   "common_word_rank_cutoff": 6000,
   "max_plausible_mcap_sol": 5000,
   "max_mark_jump_x": 20,
-  "require_sol_quote": true
+  "require_sol_quote": true,
+  "v2": {
+    "enabled": true,
+    "note": "Test v2 (added Oct 30 2026 at owner's request: more trades + better hit rate). Runs as extra rules FIRST2 and MOMO beside the unchanged v1 FIRST/LEADER; reported separately. Same 0.05 SOL notional, 8% rt_cost and pass bar (>=50 closed + net > 0 per rule).",
+    "max_concurrent_per_rule": 5,
+    "first2_max_coin_age_sec": 180,
+    "first2_max_attempts": 3,
+    "momo_min_watch_sec": 45,
+    "momo_watch_sec": 600,
+    "momo_min_mcap_sol": 33,
+    "momo_rising_marks": 2,
+    "momo_max_checks_per_cycle": 24,
+    "exit_sl_gross": -0.15,
+    "exit_tp_cap_gross": 1.0,
+    "exit_trail_arm_gross": 0.15,
+    "exit_trail_drop": 0.12,
+    "exit_time_sec": 600
+  }
 }

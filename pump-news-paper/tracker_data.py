@@ -101,9 +101,10 @@ voided = [{"time": et(x.get("exit_iso")), "rule": x["rule"], "symbol": x["symbol
            "story": short(x.get("story"), 60), "entry_mcap_sol": fnum(x.get("entry_mcap_sol")), "reason": x.get("void_reason") or "excluded"} for x in allrows if _excl(x)]
 rows = [x for x in allrows if not _excl(x)]
 rows.sort(key=lambda r: fnum(r.get("exit_ts")) or 0)
+V1_RULES, V2_RULES = ["FIRST", "LEADER"], ["FIRST2", "MOMO"]
+RULES = V1_RULES + [r for r in V2_RULES if (cfg.get("v2") or {}).get("enabled") or any(x["rule"] == r for x in allrows)]
 rules = {}
-series_pts = []  # (ts, rule, pnl)
-for rule in ("FIRST", "LEADER"):
+for rule in RULES:
     r = [x for x in rows if x["rule"] == rule]
     pn = [fnum(x["pnl_sol"]) or 0.0 for x in r]; nr = [fnum(x["net_ret"]) or 0.0 for x in r]
     eq = peak = dd = 0.0
@@ -115,13 +116,14 @@ for rule in ("FIRST", "LEADER"):
         "avg_loss_pct": round(sum(l) / len(l) * 100, 1) if l else None,
         "net_sol": round(sum(pn), 5), "net_pct": round(sum(pn) / (notional * len(r)) * 100, 1) if r else 0,
         "max_dd_sol": round(dd, 5), "exits": dict(Counter(x["reason"] for x in r)),
-        "progress": min(len(r), 50), "pass_bar_met": len(r) >= 50 and sum(pn) > 0, "open": 0}
+        "progress": min(len(r), 50), "pass_bar_met": len(r) >= 50 and sum(pn) > 0, "open": 0,
+        "version": "v2" if rule in V2_RULES else "v1"}
 # cumulative series: one point per close, both rules carried forward
-cum = {"FIRST": 0.0, "LEADER": 0.0}; series = []
+cum = {r: 0.0 for r in RULES}; series = []
 for x in rows:
     cum[x["rule"]] = cum.get(x["rule"], 0.0) + (fnum(x["pnl_sol"]) or 0.0)
-    series.append({"label": et(x.get("exit_iso"), "%-m/%-d %-I:%M %p")[:-3], "FIRST": round(cum["FIRST"], 5), "LEADER": round(cum["LEADER"], 5)})
-if series: series.insert(0, {"label": "Start", "FIRST": 0.0, "LEADER": 0.0})
+    series.append({"label": et(x.get("exit_iso"), "%-m/%-d %-I:%M %p")[:-3], **{r: round(v, 5) for r, v in cum.items()}})
+if series: series.insert(0, {"label": "Start", **{r: 0.0 for r in cum}})
 
 recent = []
 for x in reversed(rows[-25:]):
@@ -182,7 +184,7 @@ consensus = {"status": "Paused", "paused_at": "Oct 29, 12:58 PM ET", "first_sign
                 "net_pct": fnum(c.get("net_pct_after_8rt")), "pnl_sol": fnum(c.get("sim_pnl_sol"))} for c in closes]}
 
 DATA = {"as_of": datetime.now(ET).strftime("%b %-d, %-I:%M %p") + " ET", "status": status, "rules": rules,
-        "series": series, "open": opens, "recent": recent, "matches": recent_matches, "skips": skip_list, "excluded": voided, "consensus": consensus}
+        "rule_order": RULES, "series": series, "open": opens, "recent": recent, "matches": recent_matches, "skips": skip_list, "excluded": voided, "consensus": consensus}
 
 if "--block" in sys.argv:
     blk = "// DATA-START\nconst DATA = " + json.dumps(DATA, ensure_ascii=False, separators=(",", ":")) + ";\n// DATA-END"

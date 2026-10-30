@@ -35,6 +35,21 @@ Shared:
   (`api.rugcheck.xyz/v1/tokens/{mint}/report`, free): rugged, mint/freeze authority set, any non-curve holder >20%, dev >10%,
   >5 insiders, creator ≥5 prior tokens. If Rugcheck is unreachable the trade proceeds tagged `rugcheck=unavailable`.
 
+## Test v2: FIRST2 + MOMO (added Oct 30, 2026 at the owner's request: "more trades and more success")
+v2 runs as **two extra rules in the same bot**, beside the **unchanged** v1 FIRST/LEADER (v1 code paths and thresholds are
+untouched, so the v1 test continues cleanly and both versions see the same news and coins). Rules are reported separately
+(CSV `rule` column; dashboard tags each card v1/v2). Settings live in `config.json` → `"v2"`; `"enabled": false` turns v2 off.
+Same 0.05 SOL notional, 8% `rt_cost`, rug filters and pass bar (≥50 closed AND net > 0, per rule).
+| | FIRST2 | MOMO |
+|---|---|---|
+| Entry | Like FIRST, but if the earliest coin is skipped (rug filter, bad price) it tries the next-earliest coin in the cluster, up to `first2_max_attempts`=3, coin age ≤180 s | Every cycle from 45 s to 600 s after a coin is detected, re-price it; enter the first cluster coin with mcap ≥ `momo_min_mcap_sol`=33 SOL **and** rising over the last `momo_rising_marks`=2 checks. LEADER looks once at 150 s; MOMO keeps watching |
+| Why | v1 FIRST gives up on a cluster after one filtered coin → lost trades | LEADER skipped most clusters as `no_traction` at its single 150 s check |
+Shared v2 changes: **max 5 concurrent** per rule (v1: 3). **Exits:** SL −15% gross, **trailing stop** (once up ≥ +15% gross, exit
+if price falls 12% from its peak), hard cap +100%, time exit 600 s. v1 capped winners at +30% while losses run past −15% after
+costs; the trailing stop lets runners keep going. Exit reason `trail` is new.
+**Unproven:** none of this has been validated on real data (only 4 v1 trades existed). Expect more trades; whether net PnL
+improves is exactly what v2 measures. MOMO buys after a rise, so it can chase tops (see stop-loss risk).
+
 ## Data sources (all free, no keys)
 - News (every 90 s): Google News RSS (top, entertainment, tech, "viral when:1h", "elon musk when:1h"), Google Trends US RSS,
   Bluesky public trends (`app.bsky.unspecced.getTrends`), Know Your Meme newsfeed, TMZ, BBC, Hacker News front page (Algolia).
@@ -63,7 +78,7 @@ Affected historical trades are kept in the CSV with `excluded`/`void_reason` set
 - `src/newsbot.py` uses `signal.SIGALRM` for the 45 s cycle deadline → **Unix only (Linux/macOS)**; on Windows use WSL.
 
 ## Pass bar (fixed before results)
-Per rule: **≥50 closed paper trades AND positive total net PnL after the 8% costs.** Also report max drawdown (cumulative SOL),
+Per rule (v1 FIRST/LEADER and v2 FIRST2/MOMO each): **≥50 closed paper trades AND positive total net PnL after the 8% costs.** Also report max drawdown (cumulative SOL),
 win rate, avg win/avg loss, exit-reason mix, FIRST vs LEADER. If neither passes → not viable for live.
 
 ## How to run

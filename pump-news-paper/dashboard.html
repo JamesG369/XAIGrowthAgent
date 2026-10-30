@@ -9,7 +9,7 @@
   --bg:#0b0d12; --panel:#12151c; --panel-2:#171b24; --line:#232836; --line-soft:#1b1f2a;
   --text:#e7eaf0; --muted:#8a93a6; --faint:#5d6578;
   --pos:#2fd07f; --neg:#ff5d6c; --warn:#f5b23d; --info:#5aa2ff;
-  --first:#5aa2ff; --leader:#c084fc;
+  --first:#5aa2ff; --leader:#c084fc; --first2:#2dd4bf; --momo:#fb923c;
   --pos-bg:rgba(47,208,127,.12); --neg-bg:rgba(255,93,108,.12); --warn-bg:rgba(245,178,61,.14); --info-bg:rgba(90,162,255,.12);
   --shadow:0 1px 0 rgba(255,255,255,.03) inset, 0 8px 24px rgba(0,0,0,.25);
   --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
@@ -19,7 +19,7 @@
   --bg:#f5f6f9; --panel:#ffffff; --panel-2:#f8f9fb; --line:#e3e6ec; --line-soft:#eef0f4;
   --text:#141821; --muted:#5d6577; --faint:#9099ab;
   --pos:#0f9d58; --neg:#d93648; --warn:#b7791f; --info:#2b6fd6;
-  --first:#2b6fd6; --leader:#8b3fd9;
+  --first:#2b6fd6; --leader:#8b3fd9; --first2:#0d9488; --momo:#c2410c;
   --pos-bg:rgba(15,157,88,.1); --neg-bg:rgba(217,54,72,.09); --warn-bg:rgba(183,121,31,.12); --info-bg:rgba(43,111,214,.09);
   --shadow:0 1px 2px rgba(16,24,40,.05);
 }
@@ -66,7 +66,7 @@ a{color:inherit;text-decoration:none} a:hover{text-decoration:underline}
 .split{display:flex;gap:14px;font-size:12.5px;color:var(--muted);flex-wrap:wrap}
 .split b{font-family:var(--mono);font-weight:600;color:var(--text)}
 .sw{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;vertical-align:0}
-.sw.FIRST{background:var(--first)} .sw.LEADER{background:var(--leader)}
+.sw.FIRST{background:var(--first)} .sw.LEADER{background:var(--leader)} .sw.FIRST2{background:var(--first2)} .sw.MOMO{background:var(--momo)}
 
 /* rule cards */
 .rules{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
@@ -111,7 +111,10 @@ td.r,th.r{text-align:right}
 .chip{display:inline-block;font:600 11px/1 var(--sans);padding:4px 7px;border-radius:6px;white-space:nowrap}
 .chip.FIRST{color:var(--first);background:color-mix(in srgb,var(--first) 14%,transparent)}
 .chip.LEADER{color:var(--leader);background:color-mix(in srgb,var(--leader) 14%,transparent)}
-.chip.tp{color:var(--pos);background:var(--pos-bg)} .chip.sl{color:var(--neg);background:var(--neg-bg)}
+.chip.FIRST2{color:var(--first2);background:color-mix(in srgb,var(--first2) 14%,transparent)}
+.chip.MOMO{color:var(--momo);background:color-mix(in srgb,var(--momo) 14%,transparent)}
+.ver{font:600 10px/1 var(--sans);letter-spacing:.05em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:3px 5px;margin-left:6px;vertical-align:2px}
+.chip.tp{color:var(--pos);background:var(--pos-bg)} .chip.trail{color:var(--info);background:var(--info-bg)} .chip.sl{color:var(--neg);background:var(--neg-bg)}
 .chip.time,.chip.other{color:var(--muted);background:var(--panel-2);border:1px solid var(--line)}
 .kw{font-family:var(--mono);font-size:12px;color:var(--text);background:var(--panel-2);border:1px solid var(--line);padding:2px 6px;border-radius:5px}
 .empty{padding:26px 18px 30px;text-align:center;color:var(--faint);font-size:13px}
@@ -196,7 +199,7 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:20px}
   <section class="rules" id="rules"></section>
 
   <section class="card section">
-    <div class="sec-head"><h2>Open positions</h2><span class="count" id="openCount">0</span><span class="hint">TP +30% · SL −15% · time exit 10 min</span></div>
+    <div class="sec-head"><h2>Open positions</h2><span class="count" id="openCount">0</span><span class="hint">v1: TP +30% · SL −15% · 10 min. v2: SL −15% · trail 12% after +15% · 10 min</span></div>
     <div id="openBody"></div>
   </section>
 
@@ -242,9 +245,18 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:20px}
 </main>
 
 <script>
-const REFRESH_S = 10, PASS_TRADES = 50, RULES = ["FIRST", "LEADER"];
-const RULE_DESC = { FIRST: "Earliest matching coin, at detection", LEADER: "Top mcap ≥35 SOL after 150 s" };
-const EXIT_LABEL = { tp: "Take profit", sl: "Stop loss", time: "Time exit" };
+const REFRESH_S = 10, PASS_TRADES = 50;
+let RULES = ["FIRST", "LEADER"];
+const RULE_DESC = {
+  FIRST: "Earliest matching coin, at detection",
+  LEADER: "Top mcap ≥35 SOL after 150 s",
+  FIRST2: "Earliest coin that passes filters (up to 3 tries) · trailing exit",
+  MOMO: "Any cluster coin ≥33 SOL and still rising, watched 10 min · trailing exit",
+};
+const V2_RULES = ["FIRST2", "MOMO"];
+const EXIT_LABEL = { tp: "Take profit", sl: "Stop loss", time: "Time exit", trail: "Trailing stop" };
+// gross % bounds for the open-position range bar: v1 TP +30%, v2 has a trailing stop and a +100% cap
+const RANGE = r => V2_RULES.includes(r) ? [-15, 100] : [-15, 30];
 const $ = id => document.getElementById(id);
 let lastData = null, paused = false, countdown = REFRESH_S, inflight = false;
 
@@ -264,7 +276,7 @@ function dur(s) {
 const shortTime = t => esc(String(t || "").replace(/^[A-Z][a-z]{2} \d+, /, "").replace(/ ET$/, ""));
 const coinLink = (sym, name, mint) => `<a class="coin" href="https://pump.fun/coin/${encodeURIComponent(mint || "")}" target="_blank" rel="noopener noreferrer"><b>${esc(sym)}</b> <span class="sub">${esc(name)}</span></a>`;
 const ruleChip = r => `<span class="chip ${esc(r)}">${esc(r)}</span>`;
-const exitChip = r => `<span class="chip ${["tp", "sl", "time"].includes(r) ? r : "other"}">${esc(EXIT_LABEL[r] || r)}</span>`;
+const exitChip = r => `<span class="chip ${["tp", "sl", "time", "trail"].includes(r) ? r : "other"}">${esc(EXIT_LABEL[r] || r)}</span>`;
 const table = (head, rows, empty) => rows.length
   ? `<div class="tbl-wrap"><table><thead><tr>${head}</tr></thead><tbody>${rows.join("")}</tbody></table></div>`
   : `<div class="empty">${empty}</div>`;
@@ -272,6 +284,7 @@ const table = (head, rows, empty) => rows.length
 // ---------- render ----------
 function render(d) {
   lastData = d;
+  if (Array.isArray(d.rule_order) && d.rule_order.length) RULES = d.rule_order;
   $("sampleTag").hidden = !d.sample;
   $("asOf").textContent = "Data as of " + (d.as_of || "—");
   renderStatus(d.status);
@@ -309,7 +322,7 @@ function renderKpis(d) {
   $("kClosed").textContent = closed;
   $("kClosedSplit").innerHTML = split(x => `${x.closed || 0}<span class="faint"> / ${PASS_TRADES}</span>`);
   $("kOpen").textContent = open;
-  $("kOpenSplit").innerHTML = split(x => `${x.open || 0}<span class="faint"> / 3</span>`);
+  $("kOpenSplit").innerHTML = split(x => `${x.open || 0}`);
 }
 
 function renderRules(rules = {}) {
@@ -319,11 +332,11 @@ function renderRules(rules = {}) {
     const tradesOk = closed >= PASS_TRADES, pnlOk = net > 0;
     const verdict = r.pass_bar_met ? ["pass", "Pass bar met"] : tradesOk ? ["failing", "Failed: net ≤ 0"] : ["pending", `${PASS_TRADES - closed} trades to go`];
     const ex = r.exits || {}, exTotal = Object.values(ex).reduce((a, b) => a + b, 0);
-    const exColor = { tp: "var(--pos)", sl: "var(--neg)", time: "var(--faint)" };
+    const exColor = { tp: "var(--pos)", sl: "var(--neg)", time: "var(--faint)", trail: "var(--info)" };
     const mix = exTotal ? Object.entries(ex).map(([k, v]) => `<span style="width:${v / exTotal * 100}%;background:${exColor[k] || "var(--warn)"}" title="${esc(EXIT_LABEL[k] || k)}: ${v}"></span>`).join("") : "";
     const color = `var(--${name.toLowerCase()})`;
     return `<div class="card rule" style="border-top:3px solid ${color}">
-      <div class="rule-head"><div><div class="rule-name" style="color:${color}">${name}</div><div class="rule-desc">${RULE_DESC[name]}</div></div>
+      <div class="rule-head"><div><div class="rule-name" style="color:${color}">${name}<span class="ver">${r.version || "v1"}</span></div><div class="rule-desc">${RULE_DESC[name]}</div></div>
         <span class="verdict ${verdict[0]}">${verdict[1]}</span></div>
       <div class="stats">
         <div class="stat"><div class="k">Net PnL</div><div class="v ${cls(net)}">${sol(net)}</div></div>
@@ -347,18 +360,17 @@ function renderRules(rules = {}) {
 
 function renderOpen(rows) {
   $("openCount").textContent = rows.length;
-  const SL = -15, TP = 30, span = TP - SL, at = v => Math.min(Math.max((v - SL) / span, 0), 1) * 100;
   $("openBody").innerHTML = table(
     `<th>Rule</th><th>Coin</th><th>Keyword</th><th>Story</th><th class="r">Held</th><th class="r">Entry mcap</th><th class="r">Mark</th><th class="r">Gross</th><th>SL ← → TP</th>`,
     rows.map(p => {
-      const g = p.gross_pct;
+      const g = p.gross_pct, [SL, TP] = RANGE(p.rule), at = v => Math.min(Math.max((v - SL) / (TP - SL), 0), 1) * 100;
       const col = g == null ? "var(--faint)" : g >= 0 ? "var(--pos)" : "var(--neg)";
       return `<tr><td>${ruleChip(p.rule)}</td><td class="nowrap">${coinLink(p.symbol, p.name, p.mint)}</td>
         <td><span class="kw">${esc(p.keyword)}</span></td><td class="story" title="${esc(p.story)}">${esc(p.story)}</td>
         <td class="r num">${dur(p.held_s)}</td><td class="r num">${p.entry_mcap_sol ?? "—"}</td><td class="r num">${p.mark_mcap_sol ?? "—"}</td>
         <td class="r num ${cls(g)}">${pct(g)}</td>
         <td><div class="range"><span class="zero" style="left:${at(0)}%"></span>${g == null ? "" : `<span class="mk" style="left:${at(g)}%;background:${col}"></span>`}</div>
-          <div class="range-lbl"><span>−15</span><span>0</span><span>+30</span></div></td></tr>`;
+          <div class="range-lbl"><span>${SL}</span><span>0</span><span>+${TP}</span></div></td></tr>`;
     }),
     "No open paper positions. New entries appear here within ~15 s of a match.");
 }

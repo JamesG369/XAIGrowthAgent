@@ -42,3 +42,6 @@ heartbeat >180 s), `src/stats.py`; logs: `status.log` (heartbeat lines, opens/cl
 
 ## Dashboard
 `./run.sh dashboard` → http://127.0.0.1:8050 (read-only, refreshes every 10 s). `./run.sh dashboard --sample` shows the bundled snapshot.
+
+## Test v2 (added Oct 30, 2026)
+Two extra rules run beside the unchanged v1 rules and are reported separately: **FIRST2** (FIRST that tries up to 3 coins per cluster if earlier ones fail filters) and **MOMO** (enters any cluster coin ≥33 SOL that is still rising, watched for 10 min). v2 exits: SL −15%, trailing stop 12% from peak once +15%, +100% cap, 600 s time exit; max 5 concurrent per rule. Same pass bar. Settings: `config.json` → `v2`. Details in CLAUDE.md.
