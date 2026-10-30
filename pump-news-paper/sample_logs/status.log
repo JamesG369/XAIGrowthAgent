@@ -1,0 +1,51 @@
+2026-10-30T17:31:58-04:00 START pid=781312 PAPER_ONLY cfg tp=0.3 sl=-0.15 time=600s cost=0.08
+2026-10-30T17:31:59-04:00 cycle=1 dur=1.05s stories+=151 kws=292 coins=100 new=100 matches=0 [] open=0 pump_errs=0
+2026-10-30T17:33:44-04:00 cycle=8 dur=1.02s stories+=9 kws=313 coins=100 new=10 matches=0 [] open=0 pump_errs=0
+2026-10-30T17:35:29-04:00 cycle=15 dur=0.98s stories+=3 kws=311 coins=100 new=7 matches=0 [] open=0 pump_errs=0
+2026-10-30T17:35:59-04:00 PAPER OPEN FIRST SXSI kw=spacex mcap=34.2 SOL ($3,266) age=15s
+2026-10-30T17:35:59-04:00 cycle=17 dur=1.27s stories+=None kws=311 coins=100 new=7 matches=1 ['SXSI~spacex'] open=1 pump_errs=0
+2026-10-30T17:36:44-04:00 PAPER CLOSE FIRST SXSI sl gross=-18.0% net=-26.0% pnl=-0.0130 SOL hold=45s
+2026-10-30T17:36:44-04:00 cycle=20 dur=0.72s stories+=None kws=311 coins=100 new=9 matches=0 [] open=0 pump_errs=0
+2026-10-30T17:37:14-04:00 cycle=22 dur=1.03s stories+=2 kws=316 coins=100 new=7 matches=0 [] open=0 pump_errs=0
+2026-10-30T17:37:59-04:00 cycle=25 dur=0.93s stories+=None kws=316 coins=100 new=8 matches=1 ['Pepebutfr~pepe'] open=0 pump_errs=0
+2026-10-30T17:38:14-04:00 cycle=26 dur=1.03s stories+=None kws=316 coins=100 new=6 matches=1 ['Kimi~kimi'] open=0 pump_errs=0
+2026-10-30T17:38:59-04:00 cycle=29 dur=1.06s stories+=2 kws=322 coins=100 new=4 matches=0 [] open=0 pump_errs=0
+2026-10-30T17:39:14-04:00 cycle=30 dur=1.03s stories+=None kws=322 coins=100 new=12 matches=1 ['SHEET~costumes'] open=0 pump_errs=0
+2026-10-30T17:40:45-04:00 cycle=36 dur=1.41s stories+=5 kws=335 coins=100 new=6 matches=0 [] open=0 pump_errs=0
+2026-10-30T17:41:14-04:00 PAPER OPEN FIRST Maga kw=trump mcap=28.1 SOL ($2,683) age=57s
+2026-10-30T17:41:14-04:00 cycle=38 dur=1.21s stories+=None kws=335 coins=100 new=5 matches=1 ['Maga~trump'] open=1 pump_errs=0
+2026-10-30T17:41:29-04:00 cycle=39 dur=1.02s stories+=None kws=335 coins=100 new=9 matches=3 ['GAMBLER~gamble', 'GAMBLER~gamble', 'GAMBLER~gamble'] open=1 pump_errs=0
+2026-10-30T17:41:44-04:00 cycle=40 dur=0.68s stories+=None kws=335 coins=100 new=7 matches=0 [] open=1 pump_errs=0
+2026-10-30T17:42:30-04:00 cycle=43 dur=1.39s stories+=7 kws=346 coins=100 new=15 matches=0 [] open=1 pump_errs=0
+2026-10-30T17:42:44-04:00 PAPER OPEN FIRST KSHIBA kw=viral mcap=36.3 SOL ($3,457) age=13s
+2026-10-30T17:42:45-04:00 cycle=44 dur=2.28s stories+=None kws=346 coins=100 new=13 matches=3 ['GrokTyson~grok', 'KSHIBA~viral', 'puonborad~mascot'] open=2 pump_errs=0
+2026-10-30T17:44:03-04:00 cycle=49 dur=2.09s stories+=10 kws=351 coins=100 new=12 matches=0 [] open=2 pump_errs=0
+2026-10-30T17:45:02-04:00 cycle=53 dur=0.93s stories+=None kws=351 coins=100 new=4 matches=1 ['TUSK ~trump'] open=2 pump_errs=0
+2026-10-30T17:45:17-04:00 PAPER OPEN LEADER KSHIBA kw=viral mcap=36.3 SOL ($3,457) age=166s
+2026-10-30T17:45:18-04:00 cycle=54 dur=2.42s stories+=None kws=351 coins=100 new=9 matches=1 ['PEPE~pepe'] open=3 pump_errs=0
+2026-10-30T17:45:47-04:00 cycle=56 dur=1.41s stories+=2 kws=355 coins=100 new=11 matches=1 ['SSI~spacex'] open=3 pump_errs=0
+2026-10-30T17:46:02-04:00 cycle=57 dur=1.33s stories+=None kws=355 coins=100 new=17 matches=1 ['Optimism~elon'] open=3 pump_errs=0
+2026-10-30T17:46:46-04:00 cycle=60 dur=0.66s stories+=None kws=355 coins=100 new=10 matches=1 ['TUSK ~trump'] open=3 pump_errs=0
+2026-10-30T17:47:32-04:00 cycle=63 dur=1.46s stories+=5 kws=353 coins=100 new=6 matches=0 [] open=3 pump_errs=0
+2026-10-30T17:48:32-04:00 PAPER OPEN FIRST Mei Mei kw=leopard mcap=4293067.7 SOL ($2,267) age=3s
+2026-10-30T17:48:32-04:00 cycle=67 dur=1.34s stories+=None kws=353 coins=100 new=4 matches=1 ['Mei Mei~leopard'] open=4 pump_errs=0
+2026-10-30T17:49:01-04:00 cycle=69 dur=0.75s stories+=None kws=353 coins=100 new=7 matches=1 ['Himmel~leopard'] open=4 pump_errs=0
+2026-10-30T17:49:17-04:00 cycle=70 dur=1.4s stories+=4 kws=366 coins=100 new=11 matches=0 [] open=4 pump_errs=0
+2026-10-30T17:49:47-04:00 cycle=72 dur=0.83s stories+=None kws=366 coins=100 new=12 matches=1 ['Pilly~mascot'] open=4 pump_errs=0
+2026-10-30T17:51:03-04:00 PAPER OPEN LEADER Himmel kw=leopard mcap=4296370.4 SOL ($2,266) age=125s
+2026-10-30T17:51:03-04:00 cycle=77 dur=2.6s stories+=5 kws=369 coins=100 new=7 matches=0 [] open=5 pump_errs=0
+2026-10-30T17:51:17-04:00 PAPER CLOSE FIRST Maga time gross=+0.0% net=-8.0% pnl=-0.0040 SOL hold=602s
+2026-10-30T17:51:47-04:00 cycle=80 dur=0.92s stories+=None kws=369 coins=100 new=7 matches=0 [] open=4 pump_errs=0
+2026-10-30T17:52:47-04:00 PAPER CLOSE FIRST KSHIBA time gross=+11.4% net=+3.4% pnl=+0.0017 SOL hold=603s
+2026-10-30T17:52:47-04:00 cycle=84 dur=1.37s stories+=2 kws=372 coins=100 new=10 matches=1 ['ELON~elon'] open=3 pump_errs=0
+2026-10-30T17:53:02-04:00 PAPER CLOSE LEADER KSHIBA sl gross=-17.2% net=-25.2% pnl=-0.0126 SOL hold=464s
+2026-10-30T17:53:26-04:00 STOP via run.sh
+2026-10-30T17:53:53-04:00 VOID 2 paper positions (Mei Mei FIRST, Himmel LEADER): bad_price_data (non-SOL quote mint); excluded from stats
+2026-10-30T17:54:02-04:00 START pid=791633 PAPER_ONLY cfg tp=0.3 sl=-0.15 time=600s cost=0.08
+2026-10-30T17:54:03-04:00 cycle=87 dur=0.98s stories+=6 kws=385 coins=100 new=25 matches=0 [] open=0 pump_errs=0
+2026-10-30T17:55:48-04:00 cycle=94 dur=1.13s stories+=5 kws=398 coins=100 new=9 matches=0 [] open=0 pump_errs=0
+2026-10-30T17:57:03-04:00 cycle=99 dur=1.01s stories+=None kws=398 coins=100 new=22 matches=3 ['Doglon~musk', 'Doglon~musk', 'Doglon~musk'] open=0 pump_errs=0
+2026-10-30T17:57:18-04:00 cycle=100 dur=0.69s stories+=None kws=398 coins=100 new=22 matches=2 ['CAPITAL~hype', 'CAPITAL~hype'] open=0 pump_errs=0
+2026-10-30T17:57:33-04:00 cycle=101 dur=1.03s stories+=3 kws=399 coins=100 new=7 matches=0 [] open=0 pump_errs=0
+2026-10-30T17:58:32-04:00 cycle=105 dur=0.49s stories+=None kws=399 coins=100 new=7 matches=1 ['MAPCOIN~pepe'] open=0 pump_errs=0
+2026-10-30T17:59:18-04:00 cycle=108 dur=0.99s stories+=0 kws=397 coins=100 new=4 matches=1 ['Trump ~trump'] open=0 pump_errs=0

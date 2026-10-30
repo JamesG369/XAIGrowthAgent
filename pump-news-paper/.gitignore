@@ -1,0 +1,8 @@
+logs/
+data/state.json
+data/*.bak*
+*.bak*
+*.pid
+__pycache__/
+tracker_block_*.txt
+.env
