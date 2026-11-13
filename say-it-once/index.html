@@ -1,0 +1,513 @@
+<title>Say It Once Dog Training</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one phone-width column, sticky name bar on top, five-tab bar fixed at the bottom. */
+:root{
+  --bg:#f3f6f1; --card:#ffffff; --ink:#16221b; --muted:#5d6b62; --line:#d9e1d8;
+  --field:#256b45; --field-ink:#ffffff; --field-soft:#e2efe6;
+  --ball:#d7ea3c; --ball-ink:#2c3400;
+  --warn:#b4541a; --warn-soft:#fbe9dc;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101612; --card:#1a231d; --ink:#e9f0ea; --muted:#9aa9a0; --line:#2e3a32;
+  --field:#5fbd85; --field-ink:#08140c; --field-soft:#1f3327;
+  --ball:#d7ea3c; --ball-ink:#2c3400; --warn:#f0a06c; --warn-soft:#3a2617; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101612; --card:#1a231d; --ink:#e9f0ea; --muted:#9aa9a0; --line:#2e3a32;
+  --field:#5fbd85; --field-ink:#08140c; --field-soft:#1f3327;
+  --ball:#d7ea3c; --ball-ink:#2c3400; --warn:#f0a06c; --warn-soft:#3a2617; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.45 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:0 calc(92px + env(safe-area-inset-bottom,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:14px 10px;
+  display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line)}
+.brand{font:800 1.35rem/1 var(--display);letter-spacing:-.01em}
+.brand span{background:var(--ball);color:var(--ball-ink);padding:0 .28em;border-radius:4px}
+.by{font-size:.8rem;color:var(--muted);text-align:right}
+h2{font:800 1.5rem/1.15 var(--display);margin:0;text-wrap:balance}
+h3{font:600 .78rem/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
+p{margin:0}
+.note{font-size:.85rem;color:var(--muted)}
+.demo{font-size:.82rem;background:var(--field-soft);border-radius:8px;padding:8px 12px}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.between{justify-content:space-between}
+.stack{display:flex;flex-direction:column;gap:10px}
+.num{font-variant-numeric:tabular-nums}
+
+button,select,input,textarea{font:inherit;color:inherit}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer;min-height:44px}
+.btn.primary{background:var(--field);color:var(--field-ink);border-color:var(--field)}
+.btn.small{min-height:36px;padding:6px 10px;font-size:.88rem}
+.btn.link{border:0;background:none;padding:6px 0;color:var(--field);min-height:0;align-self:flex-start}
+a{color:var(--field);font-weight:600}
+:focus-visible{outline:3px solid var(--field);outline-offset:2px}
+input,select,textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:44px}
+input[type=checkbox]{width:24px;height:24px;min-height:0;accent-color:var(--field);flex:none;padding:0}
+label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;font-weight:600;color:var(--muted)}
+label.check{flex-direction:row;align-items:center;gap:10px;color:var(--ink);font-size:1rem;font-weight:500}
+
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:2px}
+.stat b{font:800 1.9rem/1.1 var(--display);font-variant-numeric:tabular-nums}
+.stat span{font-size:.85rem;color:var(--muted)}
+.stat.hot{background:var(--ball);border-color:var(--ball);color:var(--ball-ink)}
+.stat.hot span{color:var(--ball-ink)}
+
+.list{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.item{display:flex;gap:12px;padding:12px 14px;border-top:1px solid var(--line);align-items:flex-start;width:100%;text-align:left;background:none;border-left:0;border-right:0;border-bottom:0;cursor:pointer}
+.item:first-child{border-top:0}
+div.item{cursor:default}
+.item .main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.item .side{text-align:right;font-size:.8rem;color:var(--muted);flex:none;display:flex;flex-direction:column;gap:4px;align-items:flex-end}
+.name{font-weight:700}
+.snip{color:var(--muted);font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty{padding:18px 14px;color:var(--muted);font-size:.92rem}
+.pill{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.03em;padding:2px 8px;border-radius:99px;background:var(--field-soft);color:var(--ink);white-space:nowrap}
+.pill.needs{background:var(--ball);color:var(--ball-ink)}
+.pill.owed{background:var(--warn-soft);color:var(--warn)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:7px 13px;font-weight:600;font-size:.88rem;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+.bubble{max-width:86%;padding:10px 12px;border-radius:12px;background:var(--card);border:1px solid var(--line);align-self:flex-start;overflow-wrap:anywhere}
+.bubble.out{align-self:flex-end;background:var(--field-soft);border-color:transparent}
+.bubble small{display:block;color:var(--muted);font-size:.75rem;margin-bottom:2px}
+.contact{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:.92rem;display:flex;flex-direction:column;gap:2px;user-select:text;overflow-wrap:anywhere}
+.day{display:flex;flex-direction:column;gap:8px}
+.day.today h3{color:var(--field)}
+.appt{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.weeknav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.weeknav b{font-family:var(--display);font-size:1.05rem;text-align:center}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+td,th{padding:9px 14px;border-top:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-top:0}
+td:last-child,th:last-child{text-align:right;white-space:nowrap}
+tfoot td{font-weight:700}
+
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--card);border-top:1px solid var(--line);
+  padding:6px max(16px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+nav.tabs div{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+nav.tabs button{border:0;background:none;padding:8px 2px;border-radius:10px;font-weight:600;font-size:.82rem;cursor:pointer;color:var(--muted);min-height:48px;position:relative}
+nav.tabs button[aria-current=page]{background:var(--field-soft);color:var(--ink)}
+nav.tabs i{font-style:normal;background:var(--ball);color:var(--ball-ink);border-radius:99px;font-size:.7rem;padding:0 6px;margin-left:3px}
+
+dialog{border:0;border-radius:16px;padding:18px;width:min(520px,calc(100% - 24px));background:var(--bg);color:var(--ink);max-height:90%;overflow:auto}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+dialog form{display:flex;flex-direction:column;gap:12px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.total{font:800 1.3rem var(--display)}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(100px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:99px;font-weight:600;font-size:.9rem;z-index:20;max-width:90%}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">Say It <span>Once</span></div>
+    <div class="by">Dog Training<br>by Tyler Lallemand</div>
+  </header>
+  <main id="view" class="stack" style="gap:16px"></main>
+</div>
+
+<nav class="tabs" aria-label="Sections"><div id="tabs"></div></nav>
+<div id="toast" role="status" hidden></div>
+
+<dialog id="bookDlg">
+  <form id="bookForm">
+    <h2>Book an appointment</h2>
+    <label>Client<select id="bk-client"></select></label>
+    <div id="bk-new" class="stack" hidden>
+      <div class="two">
+        <label>Client name<input id="bk-name" autocomplete="off"></label>
+        <label>Dog's name<input id="bk-dog" autocomplete="off"></label>
+      </div>
+    </div>
+    <label>Type<select id="bk-type">
+      <option value="session">Training session, $80 an hour</option>
+      <option value="consult">Free consultation</option>
+    </select></label>
+    <div class="two">
+      <label>Date<input id="bk-date" type="date" required></label>
+      <label>Start time<input id="bk-time" type="time" required></label>
+    </div>
+    <div class="two">
+      <label>Hours<input id="bk-hours" type="number" min="0.5" step="0.5" value="1" required></label>
+      <label>Round-trip miles<input id="bk-miles" type="number" min="0" step="0.1" value="0" required></label>
+    </div>
+    <label>Location<input id="bk-loc" placeholder="Street address" required></label>
+    <div class="row between"><span class="note">Amount due</span><span class="total num" id="bk-total">$80</span></div>
+    <div class="row" style="justify-content:flex-end">
+      <button type="button" class="btn" data-act="close">Cancel</button>
+      <button class="btn primary">Book it</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="logDlg">
+  <form id="logForm">
+    <h2>Log a call or text</h2>
+    <label>Client<select id="lg-client"></select></label>
+    <div id="lg-new" class="stack" hidden>
+      <div class="two">
+        <label>Client name<input id="lg-name" autocomplete="off"></label>
+        <label>Dog's name<input id="lg-dog" autocomplete="off"></label>
+      </div>
+      <label>Phone<input id="lg-phone" type="tel" autocomplete="off"></label>
+    </div>
+    <div class="two">
+      <label>How<select id="lg-ch"><option value="call">Phone call</option><option value="text">Text</option></select></label>
+      <label>Who reached out<select id="lg-dir"><option value="in">They contacted me</option><option value="out">I contacted them</option></select></label>
+    </div>
+    <label>What was it about<textarea id="lg-body" rows="3" required></textarea></label>
+    <label class="check"><input type="checkbox" id="lg-needs" checked>I still need to reply</label>
+    <div class="row" style="justify-content:flex-end">
+      <button type="button" class="btn" data-act="close">Cancel</button>
+      <button class="btn primary">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+const RATE_SESSION = 80;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2, '0');
+const iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const parse = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+const weekStart = d => addDays(d, -((d.getDay() + 6) % 7));           // Monday
+const TODAY = iso(new Date());
+const money = n => '$' + (Math.round(n * 100) / 100).toLocaleString('en-US', {minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2});
+const miles = n => (Math.round(n * 10) / 10).toLocaleString('en-US');
+const fmtTime = t => { const [h, m] = t.split(':').map(Number); return ((h + 11) % 12 + 1) + ':' + pad(m) + (h < 12 ? ' AM' : ' PM'); };
+const fmtDay = s => parse(s).toLocaleDateString('en-US', {weekday: 'long', month: 'short', day: 'numeric'});
+const fmtShort = s => parse(s).toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
+const amount = a => a.type === 'session' ? RATE_SESSION * a.hours : 0;
+const uid = () => Math.random().toString(36).slice(2, 9);
+function fmtStamp(ts) {
+  const d = new Date(ts), day = iso(d);
+  const t = fmtTime(pad(d.getHours()) + ':' + pad(d.getMinutes()));
+  if (day === TODAY) return t;
+  if (day === iso(addDays(new Date(), -1))) return 'Yesterday';
+  return fmtShort(day);
+}
+
+/* ---------- data ---------- */
+function seed() {
+  const mon = weekStart(new Date()), D = n => iso(addDays(mon, n));
+  const at = (n, h, m) => { const d = addDays(mon, n); d.setHours(h, m || 0, 0, 0); return Math.min(d.getTime(), Date.now() - 6e5); };
+  const clients = [
+    {id:'c1', name:'Marisol Vega',   dog:'Biscuit', phone:'(555) 010-2231', email:'marisol.vega@example.com',  address:'418 Alder Creek Rd',   status:'needs'},
+    {id:'c2', name:'Dan Okafor',     dog:'Moose',   phone:'(555) 010-4410', email:'dan.okafor@example.com',    address:'77 Quarry Hill Ln',    status:'needs'},
+    {id:'c3', name:'Priya Nair',     dog:'Juniper', phone:'(555) 010-8802', email:'priya.nair@example.com',    address:'2090 Wren Meadow Dr',  status:'waiting'},
+    {id:'c4', name:'Hank Brodeur',   dog:'Tank',    phone:'(555) 010-3197', email:'hank.brodeur@example.com',  address:'15 Old Mill Ct',       status:'replied'},
+    {id:'c5', name:'Gwen Ashby',     dog:'Pepper',  phone:'(555) 010-6654', email:'gwen.ashby@example.com',    address:'301 Sumac Ridge Way',  status:'needs'},
+    {id:'c6', name:'Leo Tran',       dog:'Ziggy',   phone:'(555) 010-9038', email:'leo.tran@example.com',      address:'64 Harbor View Ter',   status:'replied'},
+  ];
+  const M = (clientId, channel, dir, body, ts) => ({id: uid(), clientId, channel, dir, body, ts});
+  const messages = [
+    M('c1','email','in','Biscuit did great after Tuesday. Could we add a second session next week to work on the door-dashing?', at(3, 8, 40)),
+    M('c1','email','out','Tuesday at 10 is confirmed. Keep the leash on indoors until then.', at(-1, 17, 5)),
+    M('c2','call','in','Voicemail: Moose pulled him over on a walk. Wants to know how soon a first visit can happen.', at(4, 7, 55)),
+    M('c3','email','in','We just adopted a 9-month-old cattle dog mix and she herds the kids. Do you do a first visit?', at(1, 19, 20)),
+    M('c3','email','out','Yes, the first consultation is free. I have Thursday at 4 or Saturday at 9. Which works?', at(2, 8, 10)),
+    M('c4','text','in','Tank stayed on his place mat through the whole doorbell. Unreal.', at(2, 18, 30)),
+    M('c4','text','out','That is the work paying off. Same drill twice a day this week.', at(2, 18, 42)),
+    M('c5','text','in','Can we move Saturday to the afternoon? Pepper has the vet at 10.', at(3, 20, 15)),
+    M('c6','email','in','Venmo sent for last Friday. Thanks again.', at(0, 12, 0)),
+    M('c6','email','out','Got it, thank you. See you and Ziggy Friday.', at(0, 13, 30)),
+  ];
+  const A = (clientId, type, date, time, hours, miles, paid, method) =>
+    ({id: uid(), clientId, type, date, time, hours, miles, paid, method: method || '', location: clients.find(c => c.id === clientId).address});
+  const appts = [
+    A('c6','session', D(-3), '15:00', 1,   11.4, true,  'Venmo'),
+    A('c1','session', D(-6), '10:00', 1,   18.2, true,  'Cash'),
+    A('c4','session', D(-5), '09:00', 1.5, 26.0, true,  'Venmo'),
+    A('c4','session', D(0),  '09:00', 1.5, 26.0, false),
+    A('c1','session', D(1),  '10:00', 1,   18.2, false),
+    A('c5','consult', D(1),  '14:30', 0.5, 9.6,  false),
+    A('c3','consult', D(3),  '16:00', 0.5, 31.8, false),
+    A('c6','session', D(4),  '15:00', 1,   11.4, false),
+    A('c2','consult', D(4),  '17:30', 0.5, 14.0, false),
+    A('c5','session', D(5),  '10:30', 1,   9.6,  false),
+    A('c1','session', D(8),  '10:00', 1,   18.2, false),
+  ];
+  return {clients, messages, appts, rate: 0.70};
+}
+const KEY = 'sayitonce-concept-v1';
+let S;
+try { S = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
+if (!S || !S.clients) S = seed();
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+const client = id => S.clients.find(c => c.id === id) || {name: 'Unknown', dog: ''};
+const lastMsg = id => S.messages.filter(m => m.clientId === id).sort((a, b) => b.ts - a.ts)[0];
+
+/* ---------- ui state ---------- */
+const ui = {tab: 'home', thread: null, filter: 'needs', week: iso(weekStart(new Date())), csv: false, confirm: null};
+const TABS = [['home','Home'],['inbox','Inbox'],['calendar','Calendar'],['miles','Miles'],['money','Money']];
+const CH = {email: 'Email', text: 'Text', call: 'Call'};
+const ST = {needs: 'Needs reply', waiting: 'Waiting on them', replied: 'Replied'};
+
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.hidden = false;
+  clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2200);
+}
+const weekDays = () => Array.from({length: 7}, (_, i) => iso(addDays(parse(ui.week), i)));
+const dayMiles = d => S.appts.filter(a => a.date === d).reduce((s, a) => s + Number(a.miles || 0), 0);
+const owed = () => S.appts.filter(a => a.type === 'session' && !a.paid && a.date <= TODAY);
+
+/* ---------- views ---------- */
+function weekNav() {
+  const d = weekDays();
+  return `<div class="weeknav">
+    <button class="btn small" data-act="week" data-n="-7" aria-label="Previous week">&larr; Prev</button>
+    <b>${fmtShort(d[0])} to ${fmtShort(d[6])}</b>
+    <button class="btn small" data-act="week" data-n="7" aria-label="Next week">Next &rarr;</button></div>`;
+}
+function apptCard(a) {
+  const c = client(a.clientId), amt = amount(a);
+  const s = a.date.replace(/-/g, '') + 'T' + a.time.replace(':', '') + '00';
+  const end = new Date(parse(a.date)); const [h, m] = a.time.split(':').map(Number);
+  end.setHours(h, m + a.hours * 60);
+  const e = iso(end).replace(/-/g, '') + 'T' + pad(end.getHours()) + pad(end.getMinutes()) + '00';
+  const title = (a.type === 'session' ? 'Training: ' : 'Consultation: ') + c.dog + ' (' + c.name + ')';
+  const gcal = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent(title) +
+    '&dates=' + s + '/' + e + '&location=' + encodeURIComponent(a.location);
+  const maps = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(a.location);
+  return `<div class="appt">
+    <div class="row between"><span class="name num">${fmtTime(a.time)} &middot; ${esc(c.dog)} <span style="font-weight:500">with ${esc(c.name)}</span></span>
+      <span class="pill">${a.type === 'session' ? a.hours + ' hr session' : 'Free consultation'}</span></div>
+    <div><a href="${maps}" target="_blank" rel="noopener">${esc(a.location)}</a> <span class="note num">&middot; ${miles(a.miles)} mi round trip</span></div>
+    <div class="row between">
+      ${amt ? `<label class="check"><input type="checkbox" id="paid-${a.id}" data-act="paid" data-id="${a.id}" ${a.paid ? 'checked' : ''}>${a.paid ? 'Paid' : 'Not paid'} <span class="num">${money(amt)}</span></label>` : '<span class="note">No charge</span>'}
+      <span class="row"><a href="${gcal}" target="_blank" rel="noopener">Add to calendar</a>
+      <button class="btn link" data-act="del" data-id="${a.id}">${ui.confirm === a.id ? 'Tap again to remove' : 'Remove'}</button></span>
+    </div></div>`;
+}
+function threadRow(c) {
+  const m = lastMsg(c.id);
+  return `<button class="item" data-act="thread" data-id="${c.id}">
+    <span class="main"><span class="name">${esc(c.name)} <span class="note">&middot; ${esc(c.dog)}</span></span>
+      <span class="snip">${m ? (m.dir === 'out' ? 'You: ' : '') + esc(m.body) : 'No messages yet'}</span></span>
+    <span class="side"><span>${m ? CH[m.channel] + ' &middot; ' + fmtStamp(m.ts) : ''}</span>
+      <span class="pill ${c.status === 'needs' ? 'needs' : ''}">${ST[c.status]}</span></span></button>`;
+}
+const sortedClients = f => S.clients.filter(c => f === 'all' || c.status === f)
+  .sort((a, b) => ((lastMsg(b.id) || {}).ts || 0) - ((lastMsg(a.id) || {}).ts || 0));
+
+const views = {
+  home() {
+    const needs = sortedClients('needs'), today = S.appts.filter(a => a.date === TODAY).sort((a, b) => a.time.localeCompare(b.time));
+    const wk = iso(weekStart(new Date()));
+    const wkMiles = Array.from({length: 7}, (_, i) => dayMiles(iso(addDays(parse(wk), i)))).reduce((a, b) => a + b, 0);
+    const o = owed();
+    return `<h2>${new Date().toLocaleDateString('en-US', {weekday: 'long', month: 'long', day: 'numeric'})}</h2>
+    <div class="stats">
+      <button class="stat ${needs.length ? 'hot' : ''}" data-act="tab" data-tab="inbox"><b>${needs.length}</b><span>need a reply</span></button>
+      <button class="stat" data-act="tab" data-tab="calendar"><b>${today.length}</b><span>appointment${today.length === 1 ? '' : 's'} today</span></button>
+      <button class="stat" data-act="tab" data-tab="miles"><b>${miles(wkMiles)}</b><span>miles this week</span></button>
+      <button class="stat" data-act="tab" data-tab="money"><b>${money(o.reduce((s, a) => s + amount(a), 0))}</b><span>unpaid, ${o.length} session${o.length === 1 ? '' : 's'}</span></button>
+    </div>
+    <h3>Today</h3>
+    ${today.length ? today.map(apptCard).join('') : '<div class="list"><div class="empty">Nothing booked today.</div></div>'}
+    <h3>Needs a reply</h3>
+    <div class="list">${needs.length ? needs.map(threadRow).join('') : '<div class="empty">You are caught up.</div>'}</div>
+    <p class="demo">Concept demo with made-up clients. Nothing here sends a real email or text, and changes are saved only in this browser.</p>`;
+  },
+  inbox() {
+    if (ui.thread) return views.thread();
+    const list = sortedClients(ui.filter);
+    const count = f => S.clients.filter(c => f === 'all' || c.status === f).length;
+    return `<div class="row between"><h2>Inbox</h2><button class="btn primary small" data-act="log">Log a call or text</button></div>
+    <div class="chips">${[['needs','Needs reply'],['waiting','Waiting'],['replied','Replied'],['all','All']].map(([k, l]) =>
+      `<button class="chip" data-act="filter" data-f="${k}" aria-pressed="${ui.filter === k}">${l} ${count(k)}</button>`).join('')}</div>
+    <div class="list">${list.length ? list.map(threadRow).join('') : '<div class="empty">No conversations here.</div>'}</div>
+    <p class="note">Emails arrive here from Gmail on their own. Calls and texts come from a regular phone number, so log those with the button above.</p>`;
+  },
+  thread() {
+    const c = client(ui.thread), msgs = S.messages.filter(m => m.clientId === c.id).sort((a, b) => a.ts - b.ts);
+    const next = S.appts.filter(a => a.clientId === c.id && a.date >= TODAY).sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))[0];
+    return `<button class="btn link" data-act="back">&larr; Inbox</button>
+    <div class="row between"><h2>${esc(c.name)} <span class="note" style="font-family:var(--body);font-weight:500">&amp; ${esc(c.dog)}</span></h2>
+      <span class="pill ${c.status === 'needs' ? 'needs' : ''}">${ST[c.status]}</span></div>
+    <div class="contact"><span class="num">${esc(c.phone || 'No phone on file')}</span><span>${esc(c.email || 'No email on file')}</span><span>${esc(c.address || 'No address on file')}</span>
+      <span class="note">${next ? 'Next: ' + fmtDay(next.date) + ' at ' + fmtTime(next.time) : 'Nothing booked'}</span></div>
+    <div class="row">
+      <button class="btn primary small" data-act="book" data-id="${c.id}">Book appointment</button>
+      ${['needs','waiting','replied'].filter(s => s !== c.status).map(s => `<button class="btn small" data-act="status" data-s="${s}">Mark ${ST[s].toLowerCase()}</button>`).join('')}
+    </div>
+    <div class="stack">${msgs.map(m => `<div class="bubble ${m.dir === 'out' ? 'out' : ''}"><small>${CH[m.channel]} &middot; ${fmtStamp(m.ts)}</small>${esc(m.body)}</div>`).join('') || '<p class="note">No messages yet.</p>'}</div>
+    <form id="replyForm" class="stack">
+      <label>Reply<textarea id="rp-body" rows="3" required placeholder="Write a reply to ${esc(c.name.split(' ')[0])}"></textarea></label>
+      <div class="row"><select id="rp-ch" style="flex:1;min-width:140px" aria-label="Reply by">
+        <option value="email">By email</option><option value="text">By text (logged)</option><option value="call">Called back (logged)</option></select>
+        <button class="btn primary">Save reply</button></div>
+    </form>`;
+  },
+  calendar() {
+    const days = weekDays();
+    return `<div class="row between"><h2>Calendar</h2><button class="btn primary small" data-act="book">Book appointment</button></div>
+    ${weekNav()}
+    ${days.map(d => { const list = S.appts.filter(a => a.date === d).sort((a, b) => a.time.localeCompare(b.time));
+      return `<div class="day ${d === TODAY ? 'today' : ''}"><h3>${fmtDay(d)}${d === TODAY ? ' &middot; today' : ''}</h3>
+        ${list.length ? list.map(apptCard).join('') : '<p class="note">Open</p>'}</div>`; }).join('')}
+    <p class="note">In the full version, bookings sync both ways with the Google calendar that the Samsung Calendar app shows.</p>`;
+  },
+  miles() {
+    const days = weekDays(), yr = TODAY.slice(0, 4);
+    const total = days.reduce((s, d) => s + dayMiles(d), 0);
+    const ytd = S.appts.filter(a => a.date.startsWith(yr) && a.date <= TODAY).reduce((s, a) => s + Number(a.miles || 0), 0);
+    const csv = 'Date,Client,Dog,Destination,Purpose,Round-trip miles\n' + S.appts.filter(a => a.date <= TODAY)
+      .sort((a, b) => a.date.localeCompare(b.date)).map(a => { const c = client(a.clientId);
+        return [a.date, c.name, c.dog, '"' + a.location.replace(/"/g, '""') + '"', a.type === 'session' ? 'Training session' : 'Consultation', a.miles].join(','); }).join('\n');
+    return `<h2>Mileage</h2>${weekNav()}
+    <div class="list"><table><thead><tr><th>Day</th><th>Stops</th><th>Miles</th></tr></thead><tbody>
+      ${days.map(d => { const l = S.appts.filter(a => a.date === d);
+        return `<tr><td>${parse(d).toLocaleDateString('en-US', {weekday: 'short', day: 'numeric'})}</td><td>${l.map(a => esc(client(a.clientId).dog)).join(', ') || '<span class="note">None</span>'}</td><td>${miles(dayMiles(d))}</td></tr>`; }).join('')}
+      </tbody><tfoot><tr><td colspan="2">Week total</td><td>${miles(total)} mi</td></tr>
+      <tr><td colspan="2">Week write-off</td><td>${money(total * S.rate)}</td></tr></tfoot></table></div>
+    <div class="stats">
+      <div class="stat" style="cursor:default"><b>${miles(ytd)}</b><span>miles driven in ${yr} so far</span></div>
+      <div class="stat" style="cursor:default"><b>${money(ytd * S.rate)}</b><span>write-off in ${yr} so far</span></div>
+    </div>
+    <label>Rate per mile, in dollars<input id="rate" type="number" step="0.005" min="0" value="${S.rate}" data-act="rate"></label>
+    <p class="note">Set this to the current IRS business mileage rate. Miles are typed in when booking for now; the full version would work them out from the address.</p>
+    <button class="btn" data-act="csv">${ui.csv ? 'Hide mileage log' : 'Show mileage log for taxes'}</button>
+    ${ui.csv ? `<textarea id="csv" rows="8" readonly style="font:.8rem ui-monospace,monospace;white-space:pre">${esc(csv)}</textarea><button class="btn primary" data-act="copy">Copy log</button>` : ''}`;
+  },
+  money() {
+    const o = owed().sort((a, b) => a.date.localeCompare(b.date));
+    const paid = S.appts.filter(a => a.type === 'session' && a.paid).sort((a, b) => b.date.localeCompare(a.date));
+    const wk = iso(weekStart(new Date())), wkEnd = iso(addDays(parse(wk), 6)), mo = TODAY.slice(0, 7);
+    const sum = l => l.reduce((s, a) => s + amount(a), 0);
+    const row = a => { const c = client(a.clientId); return `<div class="item">
+      <input type="checkbox" id="pay-${a.id}" data-act="paid" data-id="${a.id}" ${a.paid ? 'checked' : ''} aria-label="Paid: ${esc(c.name)}, ${fmtShort(a.date)}">
+      <span class="main"><span class="name">${esc(c.name)} <span class="note">&middot; ${esc(c.dog)}</span></span>
+        <span class="note num">${fmtShort(a.date)} &middot; ${a.hours} hr</span></span>
+      <span class="side"><span class="name num" style="color:var(--ink);font-size:1rem">${money(amount(a))}</span>
+        ${a.paid ? `<select id="how-${a.id}" data-act="method" data-id="${a.id}" aria-label="How they paid" style="min-height:34px;padding:4px 8px;width:auto;font-size:.82rem">
+          ${['', 'Venmo', 'Cash', 'Other'].map(v => `<option value="${v}" ${a.method === v ? 'selected' : ''}>${v || 'How?'}</option>`).join('')}</select>`
+          : '<span class="pill owed">Owed</span>'}</span></div>`; };
+    return `<h2>Money</h2>
+    <div class="stats">
+      <div class="stat" style="cursor:default"><b>${money(sum(o))}</b><span>still owed</span></div>
+      <div class="stat" style="cursor:default"><b>${money(sum(paid.filter(a => a.date >= wk && a.date <= wkEnd)))}</b><span>collected this week</span></div>
+      <div class="stat" style="cursor:default"><b>${money(sum(paid.filter(a => a.date.startsWith(mo))))}</b><span>collected this month</span></div>
+      <div class="stat" style="cursor:default"><b>${money(sum(paid.filter(a => a.date.startsWith(TODAY.slice(0, 4)))))}</b><span>collected this year</span></div>
+    </div>
+    <h3>Not paid yet</h3>
+    <div class="list">${o.length ? o.map(row).join('') : '<div class="empty">Everyone is paid up.</div>'}</div>
+    <h3>Paid</h3>
+    <div class="list">${paid.length ? paid.map(row).join('') : '<div class="empty">No payments logged yet.</div>'}</div>
+    <p class="note">Tick the box when someone pays by Venmo or cash. The app never charges anyone.</p>`;
+  }
+};
+
+function render() {
+  const n = S.clients.filter(c => c.status === 'needs').length;
+  $('#tabs').innerHTML = TABS.map(([k, l]) => `<button data-act="tab" data-tab="${k}" ${ui.tab === k ? 'aria-current="page"' : ''}>${l}${k === 'inbox' && n ? `<i>${n}</i>` : ''}</button>`).join('');
+  $('#view').innerHTML = views[ui.tab]();
+}
+
+/* ---------- dialogs ---------- */
+function clientOptions(sel, pick) {
+  sel.innerHTML = S.clients.map(c => `<option value="${c.id}">${esc(c.name)} &amp; ${esc(c.dog)}</option>`).join('') + '<option value="new">New client</option>';
+  if (pick) sel.value = pick;
+}
+function bookTotal() {
+  const consult = $('#bk-type').value === 'consult';
+  $('#bk-total').textContent = consult ? 'Free' : money(RATE_SESSION * (Number($('#bk-hours').value) || 0));
+}
+function openBook(id) {
+  clientOptions($('#bk-client'), id);
+  $('#bk-date').value = ui.tab === 'calendar' && ui.week > TODAY ? ui.week : TODAY;
+  $('#bk-time').value = '10:00'; $('#bk-type').value = 'session'; $('#bk-hours').value = 1; $('#bk-miles').value = 0;
+  $('#bk-name').value = $('#bk-dog').value = '';
+  syncBookClient(); bookTotal(); $('#bookDlg').showModal();
+}
+function syncBookClient() {
+  const v = $('#bk-client').value, isNew = v === 'new';
+  $('#bk-new').hidden = !isNew; $('#bk-name').required = isNew;
+  $('#bk-loc').value = isNew ? '' : client(v).address || '';
+  const prev = S.appts.filter(a => a.clientId === v).pop();
+  if (prev) $('#bk-miles').value = prev.miles;
+}
+$('#bk-client').addEventListener('change', syncBookClient);
+$('#bk-hours').addEventListener('input', bookTotal);
+$('#bk-type').addEventListener('change', () => { if ($('#bk-type').value === 'consult') $('#bk-hours').value = 0.5; bookTotal(); });
+$('#lg-client').addEventListener('change', () => { const n = $('#lg-client').value === 'new'; $('#lg-new').hidden = !n; $('#lg-name').required = n; });
+
+$('#bookForm').addEventListener('submit', e => {
+  e.preventDefault();
+  let id = $('#bk-client').value;
+  if (id === 'new') {
+    id = uid();
+    S.clients.push({id, name: $('#bk-name').value.trim(), dog: $('#bk-dog').value.trim() || 'Dog', phone: '', email: '', address: $('#bk-loc').value.trim(), status: 'replied'});
+  }
+  const a = {id: uid(), clientId: id, type: $('#bk-type').value, date: $('#bk-date').value, time: $('#bk-time').value,
+    hours: Number($('#bk-hours').value), miles: Number($('#bk-miles').value), location: $('#bk-loc').value.trim(), paid: false, method: ''};
+  S.appts.push(a); save();
+  ui.tab = 'calendar'; ui.thread = null; ui.week = iso(weekStart(parse(a.date)));
+  $('#bookDlg').close(); render(); toast('Booked for ' + fmtDay(a.date));
+});
+$('#logForm').addEventListener('submit', e => {
+  e.preventDefault();
+  let id = $('#lg-client').value;
+  if (id === 'new') {
+    id = uid();
+    S.clients.push({id, name: $('#lg-name').value.trim(), dog: $('#lg-dog').value.trim() || 'Dog', phone: $('#lg-phone').value.trim(), email: '', address: '', status: 'needs'});
+  }
+  S.messages.push({id: uid(), clientId: id, channel: $('#lg-ch').value, dir: $('#lg-dir').value, body: $('#lg-body').value.trim(), ts: Date.now()});
+  client(id).status = $('#lg-needs').checked ? 'needs' : ($('#lg-dir').value === 'out' ? 'waiting' : 'replied');
+  save(); $('#logDlg').close(); e.target.reset(); render(); toast('Logged');
+});
+
+/* ---------- events ---------- */
+document.addEventListener('submit', e => {
+  if (e.target.id !== 'replyForm') return;
+  e.preventDefault();
+  const ch = $('#rp-ch').value;
+  S.messages.push({id: uid(), clientId: ui.thread, channel: ch, dir: 'out', body: $('#rp-body').value.trim(), ts: Date.now()});
+  client(ui.thread).status = 'replied'; save(); render();
+  toast(ch === 'email' ? 'Reply saved (demo: no email is sent)' : 'Reply logged');
+});
+document.addEventListener('change', e => {
+  const t = e.target, act = t.dataset.act, a = S.appts.find(x => x.id === t.dataset.id);
+  if (act === 'paid' && a) { a.paid = t.checked; if (!a.paid) a.method = ''; save(); render(); toast(a.paid ? 'Marked paid' : 'Marked not paid'); }
+  if (act === 'method' && a) { a.method = t.value; save(); }
+  if (act === 'rate') { S.rate = Math.max(0, Number(t.value) || 0); save(); render(); }
+});
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-act]'); if (!t) return;
+  const act = t.dataset.act;
+  if (['paid', 'method', 'rate'].includes(act)) return;
+  if (act !== 'del') ui.confirm = null;
+  if (act === 'tab') { ui.tab = t.dataset.tab; ui.thread = null; ui.csv = false; window.scrollTo(0, 0); }
+  else if (act === 'thread') { ui.tab = 'inbox'; ui.thread = t.dataset.id; window.scrollTo(0, 0); }
+  else if (act === 'back') ui.thread = null;
+  else if (act === 'filter') ui.filter = t.dataset.f;
+  else if (act === 'status') { client(ui.thread).status = t.dataset.s; save(); }
+  else if (act === 'week') ui.week = iso(addDays(parse(ui.week), Number(t.dataset.n)));
+  else if (act === 'csv') ui.csv = !ui.csv;
+  else if (act === 'book') return openBook(t.dataset.id);
+  else if (act === 'log') { clientOptions($('#lg-client'), ui.thread); $('#lg-new').hidden = true; return $('#logDlg').showModal(); }
+  else if (act === 'close') return t.closest('dialog').close();
+  else if (act === 'del') {
+    if (ui.confirm === t.dataset.id) { S.appts = S.appts.filter(a => a.id !== t.dataset.id); ui.confirm = null; save(); toast('Appointment removed'); }
+    else ui.confirm = t.dataset.id;
+  }
+  else if (act === 'copy') {
+    const box = $('#csv');
+    (navigator.clipboard ? navigator.clipboard.writeText(box.value) : Promise.reject()).then(() => toast('Mileage log copied'))
+      .catch(() => { box.focus(); box.select(); toast('Selected. Copy it from here.'); });
+    return;
+  }
+  render();
+});
+render();
+</script>
